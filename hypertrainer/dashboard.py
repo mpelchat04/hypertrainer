@@ -30,6 +30,8 @@ def perform_action():
         return submit()
     elif action == 'kill':
         return kill()
+    elif action == 'sync':
+        return sync_folder()
     elif action == 'bulk':
         # Bulk action on selected tasks
         task_ids = [k.split('-')[1] for k, v in request.form.items() if k.startswith('check-') and v]
@@ -117,3 +119,9 @@ def kill():
     em.cancel_tasks(task_id)
     flash('Cancelled task {}.'.format(task_id))
     return redirect(url_for('index'))
+
+
+def sync_folder():
+    folder = request.form['config']
+    project = request.form['project']
+    em.sync_folder(folder, project)

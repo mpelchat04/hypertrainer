@@ -282,5 +282,37 @@ class ExperimentManager:
         with filepath.open('w') as f:
             yaml.dump(task_dicts, f)
 
+    def sync_folder(self, folder: str, project: str = ''):
+        """Add tasks and results from a specified folder to the database as 'finished' tasks."""
+
+        p = Path(folder)
+        for config_file in p.glob('*.yaml'):
+            # Load yaml config
+            # config_file_path = Path(config_file)
+            yaml_config = yaml.load(config_file)
+            yaml_config = {} if yaml_config is None else yaml_config  # handle empty config file
+            name = config_file.stem
+
+            configs = {name: yaml_config}
+            # Make tasks
+            tasks = []
+            ptype = ComputePlatformType('other')
+            for name, config in configs.items():
+                t = Task(uuid=uuid.uuid4(),
+                         project_path=str(config_file.parent.absolute()),
+                         config=config,
+                         name=name,
+                         platform_type=ptype,
+                         project=project,
+                         status=TaskStatus.Finished)
+                t.save()  # insert in database
+
+
+        #     tasks.append(t)
+        # # Submit tasks
+        # for t in tasks:
+        #     self._submit_task(t)  # TODO submit in batch to server!
+        # return tasks
+
 
 experiment_manager = ExperimentManager()
